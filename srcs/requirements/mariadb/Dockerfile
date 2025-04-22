@@ -11,5 +11,5 @@ COPY tools/mariadb-entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/mariadb-entrypoint.sh
 
 # establish the script as the entrypoint
-ENTRYPOINT [ "mariadb-entrypoint.sh" ]
+ENTRYPOINT [ "/usr/local/bin/mariadb-entrypoint.sh" ]
 

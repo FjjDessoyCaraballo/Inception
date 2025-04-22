@@ -1,10 +1,6 @@
 #!/bin/bash
 
-# if any error occur (except within pipes) the script stops
 set -e
-
-# Force recreation of config regardless of firstrun flag (for debugging)
-rm -f /etc/.firstrun
 
 # Create necessary directories
 mkdir -p /etc/nginx/ssl
@@ -12,15 +8,43 @@ mkdir -p /etc/nginx/conf.d
 
 # Remove default config if it exists
 rm -f /etc/nginx/conf.d/default.conf
+rm -f /etc/nginx/http.d/default.conf
 
-# generate certificate for HTTPS
+# Generate certificate for HTTPS
 openssl req -x509 -days 365 -newkey rsa:2048 -nodes \
     -out '/etc/nginx/ssl/cert.crt' \
     -keyout '/etc/nginx/ssl/cert.key' \
     -subj "/CN=$DOMAIN_NAME" \
     >/dev/null 2>/dev/null
 
-# configure nginx to serve static wordpress files
+# Create a main nginx.conf
+cat << EOF > /etc/nginx/nginx.conf
+user nginx;
+worker_processes auto;
+pid /var/run/nginx.pid;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    include /etc/nginx/mime.types;
+    default_type application/octet-stream;
+    
+    # SSL Settings
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers on;
+    
+    # Logging Settings
+    access_log /var/log/nginx/access.log;
+    error_log /var/log/nginx/error.log;
+    
+    # Virtual Host Configs
+    include /etc/nginx/conf.d/*.conf;
+}
+EOF
+
+# Configure nginx to serve static wordpress files
 cat << EOF > /etc/nginx/conf.d/default.conf
 server {
     listen 443 ssl http2;
@@ -52,8 +76,8 @@ server {
 }
 EOF
 
-# Disable default port 80 config
-cat << EOF > /etc/nginx/conf.d/disable_default.conf
+# Redirect HTTP to HTTPS
+cat << EOF > /etc/nginx/conf.d/redirect.conf
 server {
     listen 80;
     listen [::]:80;
@@ -62,7 +86,7 @@ server {
 }
 EOF
 
-touch /etc/.firstrun
 echo "Configuration completed successfully"
 
+# Start nginx in the foreground
 exec nginx -g 'daemon off;'

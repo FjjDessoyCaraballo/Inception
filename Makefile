@@ -24,7 +24,6 @@ clean: down
 
 fclean: down
 	@echo "Complete clean of all configurations"
-	@docker stop $$(docker ps -qa)
 	@docker system prune --all --force --volumes
 	@docker network prune --force
 	@docker volume prune --force
