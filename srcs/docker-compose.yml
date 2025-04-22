@@ -15,8 +15,10 @@ services:
     networks:
       - docker-network
     ports:
-      - "3306:3306"
+      - "3306"
     image: mariadb
+    volumes:
+      - mariadb_data:/var/lib/mysql
 
   nginx:
     container_name: nginx
@@ -56,15 +58,29 @@ services:
     build:
       context: ./requirements/wordpress
     volumes:
-      - wordpress:/var/www/html
+      - wordpress_data:/var/www/html
     depends_on:
       - mariadb
     networks:
       - docker-network
     ports:
-      - "9000:9000" # written like a range because it works as "HOST_PORT:CONTAINER_PORT"
+      - "9000" # written like a range because it works as "HOST_PORT:CONTAINER_PORT"
     image: wordpress
 
 networks:
   docker-network:
     driver: bridge
+
+volumes:
+  wordpress_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: ${HOME}/data/wordpress
+      o: bind
+  mariadb_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: ${HOME}/data/mariadb
+      o: bind
