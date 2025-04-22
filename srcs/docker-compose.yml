@@ -14,7 +14,7 @@ services:
       context: ./requirements/mariadb
     networks:
       - docker-network
-    ports:
+    expose:
       - "3306"
     image: mariadb
     volumes:
@@ -63,7 +63,7 @@ services:
       - mariadb
     networks:
       - docker-network
-    ports:
+    expose:
       - "9000" # written like a range because it works as "HOST_PORT:CONTAINER_PORT"
     image: wordpress
 

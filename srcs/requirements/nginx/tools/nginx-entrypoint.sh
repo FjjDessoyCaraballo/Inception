@@ -3,26 +3,34 @@
 # if any error occur (except within pipes) the script stops
 set -e
 
-if [ ! -e /etc/.firstrun ]; then
-	# generate certificate for HTTPS
-	openssl req -x509 -days 365 -newkey rsa:2048 -nodes \
-		-out '/etc//nginx/ssl/cert.crt' \
-		-keyout '/etc/nginx/ssl/cert.key' \
-		-sub "/cn=$DOMAIN_NAME" \
-		>/dev/null 2>/dev/null
+# Force recreation of config regardless of firstrun flag (for debugging)
+rm -f /etc/.firstrun
 
-	# configure nginx to serve static wordpress files to pass php requests
-	# to the wordpress container's php-fpm process
-	cat << EOF >> /etc/nginx/http.d/default.conf
-	server {
-	listen 443 ssl http2;
-	listen [::]:443 ssl http2;
-	server_name $DOMAIN_NAME;
+# Create necessary directories
+mkdir -p /etc/nginx/ssl
+mkdir -p /etc/nginx/conf.d
 
-	ssl_certificate /etc/nginx/ssl/cert.crt;
-	ssl_certificate_key /etc/nginx/ssl/cert.key;
-	ssl_protocols TLSv1.2 TLSv1.3;
-	ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384;
+# Remove default config if it exists
+rm -f /etc/nginx/conf.d/default.conf
+
+# generate certificate for HTTPS
+openssl req -x509 -days 365 -newkey rsa:2048 -nodes \
+    -out '/etc/nginx/ssl/cert.crt' \
+    -keyout '/etc/nginx/ssl/cert.key' \
+    -subj "/CN=$DOMAIN_NAME" \
+    >/dev/null 2>/dev/null
+
+# configure nginx to serve static wordpress files
+cat << EOF > /etc/nginx/conf.d/default.conf
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name $DOMAIN_NAME;
+
+    ssl_certificate /etc/nginx/ssl/cert.crt;
+    ssl_certificate_key /etc/nginx/ssl/cert.key;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384;
 
     root /var/www/html;
     index index.php index.html index.htm;
@@ -43,7 +51,18 @@ if [ ! -e /etc/.firstrun ]; then
     }
 }
 EOF
-    touch /etc/.firstrun
-fi
+
+# Disable default port 80 config
+cat << EOF > /etc/nginx/conf.d/disable_default.conf
+server {
+    listen 80;
+    listen [::]:80;
+    server_name _;
+    return 301 https://\$host\$request_uri;
+}
+EOF
+
+touch /etc/.firstrun
+echo "Configuration completed successfully"
 
 exec nginx -g 'daemon off;'

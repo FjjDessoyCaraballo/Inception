@@ -14,7 +14,7 @@ down:
 	@echo "Stopping configuration ${NAME}"
 	@docker-compose -f ${DOCKER_COMPOSE_FILE} --env-file ${ENV_FILE} down
 
-re: down create_dirs make_dir_up_build
+re: down clean create_dirs make_dir_up_build
 
 clean: down
 	@echo "Cleaning configuration ${NAME}"

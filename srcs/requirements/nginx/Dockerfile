@@ -12,4 +12,5 @@ RUN chmod +x /usr/local/bin/nginx-entrypoint.sh && \
 	mkdir -p /etc/nginx/ssl
 
 # set the entrypoint script for the container
-ENTRYPOINT [ "nginx-entrypoint.sh" ]
+ENTRYPOINT [ "srcs/requirements/nginx/tools/nginx-entrypoint.sh" ]
+CMD ["nginx", "-g", "daemon off;"]
