@@ -2,7 +2,7 @@ services:
   mariadb:
     container_name: mariadb
     init: true 
-    restart: always
+    restart: no 
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - MYSQL_USER=${MYSQL_USER}

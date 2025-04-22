@@ -15,7 +15,7 @@ fi
 if [ ! -e /var/lib/mysql/.firstmount ]; then
 	# mysql installation
 	mysql_install_db --datadir=/var/lib/mysql --skip-test-db --user=mysql --group=mysql \
-		--auth-root-authentication-method=socket >dev/null 2>/dev/null
+		--auth-root-authentication-method=socket >/dev/null 2>/dev/null
 	# shove it to the background
 	mysqld_safe &
 	mysqld_pid=$!
