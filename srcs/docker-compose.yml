@@ -16,7 +16,7 @@ services:
       - docker-network
     expose:
       - "3306"
-    image: mariadb
+    image: custom_mariadb
     volumes:
       - mariadb_data:/var/lib/mysql
 
@@ -37,7 +37,7 @@ services:
     depends_on:
       - wordpress
       - mariadb
-    image: nginx
+    image: custom_nginx
 
   wordpress:
     container_name: wordpress
@@ -68,8 +68,8 @@ services:
     networks:
       - docker-network
     expose:
-      - "9000" # written like a range because it works as "HOST_PORT:CONTAINER_PORT"
-    image: wordpress
+      - "9000" 
+    image: custom_wordpress
 
 networks:
   docker-network:
