@@ -5,7 +5,7 @@ FROM alpine:3.20.6
 RUN apk update && apk add mariadb mariadb-client bash
 
 # copy config files
-COPY conf/my.cnf /etc/my.cnf
+COPY conf/my.cnf /etc/mysql/mariadb.conf.d/50/server-cnf
 
 # make sure the directory exists
 RUN mkdir -p /run/mysqld && chown mysql:mysql /run/mysqld
@@ -19,3 +19,4 @@ RUN chmod +x /usr/local/bin/mariadb-entrypoint.sh
 # establish the script as the entrypoint
 ENTRYPOINT [ "mariadb-entrypoint.sh" ]
 
+CMD ["mysqld"]
