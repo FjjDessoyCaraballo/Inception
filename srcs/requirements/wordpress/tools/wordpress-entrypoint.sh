@@ -72,5 +72,5 @@ else
     echo "WordPress is already installed. Skipping installation."
 fi
 
-echo "Starting PHP-FPM..."
+echo "Starting PHP-FPM"
 exec /usr/sbin/php-fpm82 -F
