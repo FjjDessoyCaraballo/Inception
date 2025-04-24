@@ -1,8 +1,8 @@
 DOCKER_COMPOSE_FILE := ./srcs/docker-compose.yml
 ENV_FILE := srcs/.env
 DATA_DIR := $(HOME)/data
-WORDPRESS_DATA_DIR := $(DATA_DIR)/custom_wordpress
-MARIADB_DATA_DIR := $(DATA_DIR)/custom_mariadb
+WORDPRESS_DATA_DIR := $(DATA_DIR)/wordpress
+MARIADB_DATA_DIR := $(DATA_DIR)/mariadb
 
 NAME = inception
 
@@ -29,6 +29,7 @@ fclean: down
 	@docker volume prune --force
 	@sudo rm -rf ${WORDPRESS_DATA_DIR}/*
 	@sudo rm -rf ${MARIADB_DATA_DIR}/*
+	@sudo rm -rf ${DATA_DIR}
 
 logs:
 	@docker-compose -f $(DOCKER_COMPOSE_FILE) --env-file $(ENV_FILE) logs -f

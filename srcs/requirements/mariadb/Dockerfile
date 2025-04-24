@@ -5,7 +5,7 @@ FROM alpine:3.20.6
 RUN apk update && apk add mariadb mariadb-client bash
 
 # copy config files
-COPY conf/my.cnf /etc/mysql/mariadb.conf.d/50/server-cnf
+COPY conf/my.cnf /etc/mysql/my.cnf
 
 # make sure the directory exists
 RUN mkdir -p /run/mysqld && chown mysql:mysql /run/mysqld
